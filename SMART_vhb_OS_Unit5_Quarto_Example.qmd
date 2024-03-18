@@ -1,0 +1,119 @@
+---
+title: "Demo"
+format: html
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+# Install required packages
+install.packages(c(
+  "colorBlindness", "directlabels", "dplyr", "ggforce", "gghighlight", 
+  "ggnewscale", "ggplot2", "ggraph", "ggrepel", "ggtext", "ggthemes", 
+  "hexbin", "Hmisc", "mapproj", "maps", "munsell", "ozmaps", 
+  "paletteer", "patchwork", "rmapshaper", "scico", "seriation", "sf", 
+  "stars", "tidygraph", "tidyr", "wesanderson" 
+))
+
+# Load required packages
+library(ggplot2)
+```
+
+You can add options to executable code like this 
+
+```{r}
+# Import data from CSV file
+data <- read.csv("Data_file.csv") 
+
+## If you are reading the file without specifying a working directory, both the .qmd file and your data should be placed in the same directory. Before reading the data, you need to set the working directory via Session -> Set Working Directory -> To Source File Location.
+```
+ 
+```{r}
+# Calculate the mean of specified variables
+mean_cognitive_reappraisal <- mean(data$CogReapp) ## Cognitive reappraisal ability
+mean_neuroticism <- mean(data$Neuroticism) ## Score of neuroticism
+mean_depression <- mean(data$Depression) ## Score of depression
+
+# Print the calculated means
+cat("Mean Cognitive Reappraisal Ability:", mean_cognitive_reappraisal, "\n")
+cat("Mean Neuroticism Score:", mean_neuroticism, "\n")
+cat("Mean Depression Score:", mean_depression, "\n")
+```
+```{r}
+# Convert Gender encoding
+data$Gender <- ifelse(data$Gender == 0, "female", "male")
+
+# Calculate mean Neuroticism by Gender
+mean_neuroticism <- aggregate(Neuroticism ~ Gender, data = data, FUN = mean)
+
+# Create plot
+Neuroticism_by_Gender <- ggplot(mean_neuroticism, aes(x = Gender, y = Neuroticism, fill = Gender)) +
+  geom_bar(stat = "identity", position = "dodge") +  # Set position to dodge to create separate bars for each gender
+  labs(title = "Comparison of Mean Neuroticism by Gender",
+       x = "Gender",
+       y = "Mean Neuroticism") +
+  scale_fill_manual(values = c("grey", "black")) +  # Custom colors, grey represents female, black represents male
+  theme_minimal()
+
+# Display plot
+print(Neuroticism_by_Gender)
+
+
+```
+
+```{r}
+# Calculate correlation coefficient
+correlation <- cor(data$CogReapp, data$Neuroticism)
+
+# Generate linear regression model
+lm_model <- lm(Neuroticism ~ CogReapp, data = data)
+
+# Create scatter plot with linear regression line using ggplot2
+scatter_with_regression <- ggplot(data, aes(x = CogReapp, y = Neuroticism)) +
+  geom_point() +  # Scatter plot
+  geom_smooth(method = "lm", se = FALSE) +  # Add linear regression line
+  labs(title = "Scatter Plot with Linear Regression Line",
+       x = "CogReapp", y = "Neuroticism",
+       subtitle = paste("Correlation:", round(correlation, 2)))
+
+
+# Display plot
+print(scatter_with_regression)
+```
+
+
+
+```{r}
+# Create distribution plot using ggplot2
+distribution_plot <- ggplot(data, aes(x = Depression)) +
+  geom_density(fill = "blue", alpha = 0.5) +
+  labs(title = "Distribution of Depression Score")
+
+# Display plot
+print(distribution_plot)
+```
+
+```{r}
+# Save distribution plot as an image
+ggsave("Neuroticism_by_Gender.png", plot = distribution_plot)
+
+# Export data to CSV
+write.csv(data, "mean_neuroticism.csv", row.names = FALSE)
+
+
+# Set working directory
+setwd("C:/Path/To/Your/Desired/Directory")
+
+# Save files
+# For example, to save a plot:
+# ggsave("plot.png")
+# And to save a data frame as a CSV file:
+# write.csv(data_frame, "data.csv")
+
+```
